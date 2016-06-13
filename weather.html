@@ -1,0 +1,193 @@
+<!--
+	Title : Weather Assignment
+	Description : This webpage gives weather forecast of the city by entering the location by User.
+	Author : Akash Anilkumar Patel
+	Create Date : 13th June 2016
+-->
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <title>Weather Assignment</title>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+    <meta charset="utf-8">
+	<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+	<script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+	<script src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
+	<script src="http://cdn.jsdelivr.net/jquery.validation/1.15.0/jquery.validate.min.js"></script>
+	<script src="http://cdn.jsdelivr.net/jquery.validation/1.15.0/additional-methods.min.js"></script>
+	<script>
+	
+	$(document).ready(function(){
+
+    	$("#cityName").validate({
+	
+		    rules: {
+		        cityName: {
+		            required: true,
+		        },
+		    },
+		    messages: {
+	      		cityName:  {
+	            	required: "Please put city name in",
+	        	},
+	        }
+	    });
+    	
+		$("#search").click(function(){
+			var cityName = $("#cityName").val();
+			
+			if(validationCheck()){
+				search(cityName);
+			}
+		});
+	
+	    $('form input').keydown(function(event){
+	    	if(event.keyCode == 13) {
+				var cityName = $("#cityName").val();
+				if(validationCheck()){
+					search(cityName);
+				}
+	      		return false;
+	    	}
+	    });
+	
+		function search(cityName){
+			var urlString = "http://api.wunderground.com/api/05843fdfbb835f7a/geolookup/conditions/q/Canada/"+cityName+".json";
+		
+			console.log(urlString);
+			
+			$.ajax({
+				url : urlString,
+				dataType : "jsonp",
+				success : function(parsed_json) {
+			  	
+					try {
+						var location = parsed_json['location']['city'];
+						var temp_c = parsed_json['current_observation']['temp_c'];
+						//$("#map").html("Current temperature in " + location + " is: " + temp_c);
+						
+						var weather = parsed_json['current_observation']['weather'];
+						var temperatureString = parsed_json['current_observation']['temperature_string'];
+						var windString = parsed_json['current_observation']['wind_string'];
+						var relativeHumidity = parsed_json['current_observation']['relative_humidity'];
+						var latitude = parsed_json['current_observation']['observation_location']['latitude'];
+						var longitude = parsed_json['current_observation']['observation_location']['longitude'];
+						var iconUrl = parsed_json['current_observation']['icon_url'];
+						var observationTime = parsed_json['current_observation']['observation_time'];
+						
+						var windString = parsed_json['current_observation']['wind_string'];
+						var windDir = parsed_json['current_observation']['wind_dir'];
+						var windDegrees = parsed_json['current_observation']['wind_degrees'];
+						var windMph = parsed_json['current_observation']['wind_mph'];
+						var pressureMb = parsed_json['current_observation']['pressure_mb'];
+						var dewpointC = parsed_json['current_observation']['dewpoint_c'];
+
+						var iconImg = '<img src= "' + iconUrl + '">';
+						
+						$("#iconImg").html(iconImg);
+						$("#cityName1").html(cityName);
+						$("#temperatureString").html(temperatureString);
+						$("#weather").html(weather);
+						$("#observationTime").html(observationTime);
+						$("#relativeHumidity").html(relativeHumidity);
+						$("#latitude").html(latitude);
+						$("#longitude").html(longitude);
+						
+						$("#windString").html(windString);
+						$("#windDir").html(windDir);
+						$("#windDegrees").html(windDegrees);
+						$("#windMph").html(windMph);
+						$("#pressureMb").html(pressureMb+" hPa");
+						$("#dewpointC").html(dewpointC+"°C");
+						$("#weather_widget").show();						
+						
+					} catch(err) {
+						console.log(err);
+						
+		    			var error = parsed_json['response']['error']['description'];
+		    			$("#error").html(error);
+					    $("#error").show();
+					}
+				}
+			});
+		}
+		
+		function validationCheck() {
+			
+			$("#cityName").valid();
+			$("#weather_widget").hide();
+			$("#error").hide();
+			return true;
+		}	
+	});
+	</script>
+	<style>
+		#weather_widget{
+			text-align:center;
+			display:none;
+		}
+		#error{
+			display:none;
+			text-align:center;
+			font-size:x-large;
+		}
+		#title{
+			text-align:center;
+			font-family: 'Tangerine', serif;
+			font-size: 48px;
+			padding-top:50px;
+			padding-bottom:50px;
+		}
+		#table{
+			border-color: 1px solid black;
+		}
+	</style>	
+  </head>
+  <body background="spicebg.jpg">
+  	<div class="container">
+	    <div id="title">Welcome to weather Forecast Page.</div>
+		<div class="col-sm-12">
+			<form class="form-inline text-center first-child" id="searchform" method="get">
+			<div class="form-group">
+				<label class="sr-only" for="help-search">Search</label>
+				<input id="cityName" name="cityName" type="text" class="form-control border-color col-sm-12" placeholder="Your city name" required>
+			</div>
+			<button type="button" class="btn btn-orange" id="search"><i class="fa fa-question-circle"></i> Search</button>
+			</form>
+		</div>
+		<br><br>
+		<div class="row" >
+			<hr>
+				<h2 class="text-color" align="center">Current weather and forecasts in your city of Canada</h2>
+				<div class="col-sm-12">
+					<div class="col-sm-12">
+					<!-- weather  -->
+						<div id="error"></div>
+						<div id="weather_widget">
+							<h3><span id="cityName1"></span>,CA</h3>
+							<h2><span id="iconImg"></span> <span id="iconImg"></span> <span id="temperatureString"></span> </h2>
+							<span id="weather"></span>
+							<p></p><div id="date_m">get at <span id="observationTime"></span></div><p></p>		
+							<table class="table-bordered table-condensed" style="border-collapse: collapse;" border="1" bordercolor="solid black" align="center" width="60%">
+								<tbody>		
+										<tr><td>Wind</td>
+											<td><span id="windString"></span> <span id="windMph"></span>mph<span id="windDir"></span>(<span id="windDegrees"></span>)</td>
+										</tr>
+										<tr><td>Humidity</td><td><span id="relativeHumidity"> %</td></tr>
+										<tr><td>Pressure</td><td id="pressureMb"></td></tr>
+										<tr><td>Dewpoint</td><td id="dewpointC"></td></tr>
+										<tr><td>Geo coords</td><td id="coord">[<span id="latitude"></span>, <span id="longitude"></span>]					
+										</td></tr>
+								
+								</tbody>
+							</table>
+						</div>	
+					</div>
+				</div>
+			</hr>
+		</div>
+	</div>
+  </body>
+</html>
